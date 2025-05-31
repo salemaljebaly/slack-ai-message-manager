@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState, useCallback, useEffect } from 'react'
+import dynamic from 'next/dynamic'
 import { ApiConfiguration } from '@/components/ApiConfiguration'
 import { SearchForm } from '@/components/SearchForm'
 import { MessageList } from '@/components/MessageList'
@@ -14,7 +15,8 @@ import { downloadFile, escapeCSV, formatDate } from '@/lib/utils'
 import { STORAGE_KEYS } from '@/constants'
 import type { Config, SearchState, Message, ValidationStatus, SlackMessage } from '@/types'
 
-export default function Home() {
+// Disable SSR for the entire Home component to prevent hydration issues
+const HomeContent = () => {
   const [config, setConfig] = useLocalStorage<Config>(STORAGE_KEYS.CONFIG, {
     slackToken: '',
     aiApiKey: '',
@@ -38,15 +40,25 @@ export default function Home() {
     slack: null,
     ai: null,
   })
+  const [showCorsWarning, setShowCorsWarning] = useState(false)
 
   const validateTokens = useCallback(async () => {
     setError('')
+    setShowCorsWarning(false)
 
     // Validate Slack token
     if (config.slackToken) {
-      const slackApi = new SlackAPI(config.slackToken)
-      const isValid = await slackApi.validateToken()
-      setValidationStatus((prev) => ({ ...prev, slack: isValid }))
+      try {
+        const slackApi = new SlackAPI(config.slackToken)
+        const isValid = await slackApi.validateToken()
+        setValidationStatus((prev) => ({ ...prev, slack: isValid }))
+      } catch (error) {
+        console.error('Slack validation error:', error)
+        setValidationStatus((prev) => ({ ...prev, slack: false }))
+        if (error instanceof Error && error.message.includes('CORS')) {
+          setShowCorsWarning(true)
+        }
+      }
     }
 
     // Validate AI API key (simplified check)
@@ -112,11 +124,7 @@ export default function Home() {
   }, [config, searchState])
 
   const deleteSelectedMessages = useCallback(async () => {
-    if (
-      !confirm(
-        `Are you sure you want to delete ${selectedMessages.size} messages? This cannot be undone.`
-      )
-    ) {
+    if (!confirm(`Are you sure you want to delete ${selectedMessages.size} messages? This cannot be undone.`)) {
       return
     }
 
@@ -215,6 +223,38 @@ export default function Home() {
         {/* Slack API Limitations Warning */}
         <SlackWarning />
 
+        {/* CORS Warning for Development */}
+        {showCorsWarning && (
+          <Alert variant="warning" title="CORS Policy Blocking Slack API">
+            <p className="mb-2">
+              The Slack API is blocking requests from your browser due to CORS policy.
+            </p>
+            <p className="font-semibold mb-1">Quick solutions for development:</p>
+            <ol className="list-decimal list-inside space-y-1 text-sm">
+              <li>
+                Install a CORS browser extension like{' '}
+                <a
+                  href="https://chrome.google.com/webstore/detail/cors-unblock/lfhmikememgdcahcdlaciloancbhjino"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-600 underline"
+                >
+                  CORS Unblock
+                </a>
+              </li>
+              <li>
+                Use a CORS proxy by creating a <code>.env.local</code> file with:
+                <pre className="bg-gray-100 p-2 mt-1 rounded text-xs">
+                  NEXT_PUBLIC_CORS_PROXY=https://cors-anywhere.herokuapp.com/
+                </pre>
+              </li>
+              <li>
+                For production, implement OAuth flow or use Slack's official SDK
+              </li>
+            </ol>
+          </Alert>
+        )}
+
         {/* Search Messages */}
         <SearchForm
           searchState={searchState}
@@ -255,3 +295,8 @@ export default function Home() {
     </div>
   )
 }
+
+// Export the component with SSR disabled
+export default dynamic(() => Promise.resolve(HomeContent), {
+  ssr: false,
+})
