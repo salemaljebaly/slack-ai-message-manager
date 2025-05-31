@@ -60,6 +60,19 @@ export const ApiConfiguration: React.FC<ApiConfigurationProps> = ({
     }
   }
 
+  const getApiKeyHint = () => {
+    switch (config.aiProvider) {
+      case 'openai':
+        return 'API key for OpenAI'
+      case 'anthropic':
+        return 'API key for Anthropic'
+      case 'google':
+        return 'API key for Google'
+      default:
+        return 'API key for your AI provider'
+    }
+  }
+
   const getValidationBadge = (status: boolean | null) => {
     if (status === null) return null
     return (
@@ -116,7 +129,7 @@ export const ApiConfiguration: React.FC<ApiConfigurationProps> = ({
             value={config.aiApiKey}
             onChange={(e) => onConfigChange({ ...config, aiApiKey: e.target.value })}
             placeholder={getApiKeyPlaceholder()}
-            hint={`API key for ${config.aiProvider}`}
+            hint={getApiKeyHint()}
             className="flex-1"
           />
           {getValidationBadge(validationStatus.ai)}

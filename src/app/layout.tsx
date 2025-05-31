@@ -8,12 +8,6 @@ export const metadata: Metadata = {
   title: 'Slack AI Message Manager',
   description: 'Detect, analyze, and manage Slack messages using AI',
   keywords: ['slack', 'ai', 'message management', 'openai', 'claude', 'gemini'],
-  authors: [{ name: 'Your Company' }],
-  openGraph: {
-    title: 'Slack AI Message Manager',
-    description: 'Detect, analyze, and manage Slack messages using AI',
-    type: 'website',
-  },
 }
 
 export default function RootLayout({
