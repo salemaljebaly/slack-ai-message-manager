@@ -10,7 +10,8 @@
     "start": "next start",
     "lint": "next lint",
     "format": "prettier --write .",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "setup:cors": "node scripts/setup-cors-proxy.js"
   },
   "dependencies": {
     "next": "15.3.3",
@@ -33,5 +34,8 @@
     "eslint-config-next": "15.3.3",
     "@typescript-eslint/parser": "^8.0.0",
     "@typescript-eslint/eslint-plugin": "^8.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   }
 }
