@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 
 export function useLocalStorage<T>(
   key: string,
@@ -22,7 +22,16 @@ export function useLocalStorage<T>(
 
   // State to store our value
   // Pass initial state function to useState so logic is only executed once
-  const [storedValue, setStoredValue] = useState<T>(readValue)
+  const [storedValue, setStoredValue] = useState<T>(() => {
+    // Prevent hydration mismatch by returning initialValue during SSR
+    if (typeof window === 'undefined') {
+      return initialValue
+    }
+    return readValue()
+  })
+
+  // Use ref to avoid infinite loops
+  const setStoredValueRef = useRef(setStoredValue)
 
   // Return a wrapped version of useState's setter function that ...
   // ... persists the new value to localStorage.
@@ -38,13 +47,13 @@ export function useLocalStorage<T>(
 
       try {
         // Allow value to be a function so we have the same API as useState
-        const newValue = value instanceof Function ? value(storedValue) : value
+        const valueToStore = value instanceof Function ? value(storedValue) : value
 
         // Save to local storage
-        window.localStorage.setItem(key, JSON.stringify(newValue))
+        window.localStorage.setItem(key, JSON.stringify(valueToStore))
 
         // Save state
-        setStoredValue(newValue)
+        setStoredValueRef.current(valueToStore)
 
         // We dispatch a custom event so every similar useLocalStorage hook is notified
         window.dispatchEvent(new Event('local-storage'))
@@ -66,7 +75,7 @@ export function useLocalStorage<T>(
 
     try {
       window.localStorage.removeItem(key)
-      setStoredValue(initialValue)
+      setStoredValueRef.current(initialValue)
 
       // We dispatch a custom event so every similar useLocalStorage hook is notified
       window.dispatchEvent(new Event('local-storage'))
@@ -76,28 +85,31 @@ export function useLocalStorage<T>(
   }, [initialValue, key])
 
   useEffect(() => {
-    const handleStorageChange = () => {
-      const newValue = readValue()
-      if (JSON.stringify(storedValue) !== JSON.stringify(newValue)) {
-        setStoredValue(newValue)
+    setStoredValueRef.current = setStoredValue
+  })
+
+  // Handle storage change
+  useEffect(() => {
+    const handleStorageChange = (e: StorageEvent | Event) => {
+      if ((e as StorageEvent)?.key && (e as StorageEvent).key !== key) {
+        return
       }
+
+      const newValue = readValue()
+      setStoredValue(newValue)
     }
 
-    // Initial value
-    handleStorageChange()
-
-    // This only works for other documents, not the current one
+    // this only works for other documents, not the current one
     window.addEventListener('storage', handleStorageChange)
 
-    // This is a custom event, triggered in writeValueToLocalStorage
-    // This way, all hooks in the same document are notified
+    // this is a custom event, triggered in setValue
     window.addEventListener('local-storage', handleStorageChange)
 
     return () => {
       window.removeEventListener('storage', handleStorageChange)
       window.removeEventListener('local-storage', handleStorageChange)
     }
-  }, [readValue, storedValue])
+  }, [key, readValue])
 
   return [storedValue, setValue, removeValue]
 }
