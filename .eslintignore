@@ -1,18 +1,16 @@
 # Dependencies
-/node_modules
-/.pnp
-.pnp.js
-.yarn/install-state.gz
-
-# Testing
-/coverage
+node_modules/
 
 # Next.js
-/.next/
-/out/
+.next/
+out/
 
 # Production
-/build
+build/
+dist/
+
+# Testing
+coverage/
 
 # Misc
 .DS_Store
@@ -25,7 +23,6 @@ yarn-error.log*
 
 # Local env files
 .env*.local
-.env
 
 # Vercel
 .vercel
@@ -34,12 +31,15 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# IDE
-.idea
-*.swp
-*.swo
+# Config files
+*.config.js
+*.config.mjs
+commitlint.config.js
+.lintstagedrc.js
 
-# OS
-Thumbs.db
-# LangGraph API
-.langgraph_api
+# Scripts
+scripts/
+build-static.js
+
+# Cache
+.eslintcache

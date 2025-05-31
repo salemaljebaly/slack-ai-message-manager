@@ -1,0 +1,54 @@
+name: Release Please
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: google-github-actions/release-please-action@v4
+        id: release
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          release-type: node
+          # package-name: slack-ai-message-manager
+
+      - uses: actions/checkout@v4
+        if: ${{ steps.release.outputs.release_created }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        if: ${{ steps.release.outputs.release_created }}
+        with:
+          node-version: '20'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install dependencies
+        if: ${{ steps.release.outputs.release_created }}
+        run: npm ci
+
+      - name: Build project
+        if: ${{ steps.release.outputs.release_created }}
+        run: npm run build:static
+
+      - name: Create release artifacts
+        if: ${{ steps.release.outputs.release_created }}
+        run: |
+          tar -czf slack-ai-message-manager-${{ steps.release.outputs.tag_name }}.tar.gz out/
+          zip -r slack-ai-message-manager-${{ steps.release.outputs.tag_name }}.zip out/
+
+      - name: Upload Release Artifacts
+        if: ${{ steps.release.outputs.release_created }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release upload ${{ steps.release.outputs.tag_name }} \
+            slack-ai-message-manager-${{ steps.release.outputs.tag_name }}.tar.gz \
+            slack-ai-message-manager-${{ steps.release.outputs.tag_name }}.zip
