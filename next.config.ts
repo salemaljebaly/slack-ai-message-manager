@@ -12,6 +12,13 @@ const nextConfig: NextConfig = {
     optimizePackageImports: ['lucide-react'],
   },
 
+  // ESLint configuration
+  eslint: {
+    // Warning: This allows production builds to successfully complete even if
+    // your project has ESLint errors.
+    ignoreDuringBuilds: false,
+  },
+
   // Remove headers configuration since it doesn't work with static export
   // Handle CORS on the client-side instead
 }
