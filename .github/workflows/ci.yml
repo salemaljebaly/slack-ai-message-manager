@@ -160,12 +160,12 @@ jobs:
           script: |
             const fs = require('fs');
             const path = require('path');
-            
+
             // Read bundle stats if available
             const comment = `## 📊 Bundle Size Analysis
-            
+
             Bundle analysis complete. Check the artifacts for detailed report.`;
-            
+
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,

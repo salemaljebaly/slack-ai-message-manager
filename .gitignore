@@ -35,10 +35,11 @@ yarn-error.log*
 next-env.d.ts
 
 # IDE
-.vscode
 .idea
 *.swp
 *.swo
 
 # OS
 Thumbs.db
+# LangGraph API
+.langgraph_api
