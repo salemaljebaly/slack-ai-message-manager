@@ -8,5 +8,14 @@
     "@typescript-eslint/explicit-module-boundary-types": "off",
     "react/display-name": "off",
     "react-hooks/exhaustive-deps": "warn"
-  }
+  },
+  "ignorePatterns": [
+    "node_modules/",
+    ".next/",
+    "out/",
+    "build/",
+    "coverage/",
+    "*.config.js",
+    "*.setup.js"
+  ]
 }
