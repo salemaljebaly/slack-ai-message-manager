@@ -28,22 +28,22 @@ export class SlackAPI {
           method: 'POST',
           headers: this.getHeaders(),
         })
-        
+
         if (!response.ok) {
           console.warn('Token validation failed:', response.status)
           return false
         }
-        
+
         const data = await response.json()
         return data.ok === true
       }
-      
+
       // For bot tokens (xoxb-), use the standard approach
       const response = await fetch(this.getUrl(API_ENDPOINTS.SLACK.AUTH_TEST), {
         method: 'POST',
         headers: this.getHeaders(),
       })
-      
+
       const data = await response.json()
       return data.ok === true
     } catch (error) {
@@ -60,9 +60,9 @@ export class SlackAPI {
         'X-Slack-Token': this.token,
       }
     }
-    
+
     return {
-      'Authorization': `Bearer ${this.token}`,
+      Authorization: `Bearer ${this.token}`,
       'Content-Type': 'application/json',
     }
   }
@@ -103,7 +103,7 @@ export class SlackAPI {
 
   async deleteMessage(permalink: string): Promise<SlackDeleteResponse> {
     const channelAndTs = extractChannelAndTimestamp(permalink)
-    
+
     if (!channelAndTs) {
       throw new Error('Invalid message permalink')
     }
@@ -136,13 +136,13 @@ export class SlackAPI {
 export function canMakeDirectAPICalls(): boolean {
   // Check if we're in a browser environment and not in a restricted context
   if (typeof window === 'undefined') return false
-  
+
   // Check if we're running in a browser extension context (which bypasses CORS)
   if ((window as any).chrome?.runtime?.id) return true
-  
+
   // Check if we're in Electron or similar environment
   if ((window as any).process?.type) return true
-  
+
   // Default to false for regular browser contexts
   return false
 }

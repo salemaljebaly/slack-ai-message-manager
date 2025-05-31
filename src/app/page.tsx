@@ -124,7 +124,11 @@ const HomeContent = () => {
   }, [config, searchState])
 
   const deleteSelectedMessages = useCallback(async () => {
-    if (!confirm(`Are you sure you want to delete ${selectedMessages.size} messages? This cannot be undone.`)) {
+    if (
+      !confirm(
+        `Are you sure you want to delete ${selectedMessages.size} messages? This cannot be undone.`
+      )
+    ) {
       return
     }
 
@@ -248,9 +252,7 @@ const HomeContent = () => {
                   NEXT_PUBLIC_CORS_PROXY=https://cors-anywhere.herokuapp.com/
                 </pre>
               </li>
-              <li>
-                For production, implement OAuth flow or use Slack's official SDK
-              </li>
+              <li>For production, implement OAuth flow or use Slack's official SDK</li>
             </ol>
           </Alert>
         )}

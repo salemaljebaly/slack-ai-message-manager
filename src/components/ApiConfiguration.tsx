@@ -78,9 +78,7 @@ export const ApiConfiguration: React.FC<ApiConfigurationProps> = ({
     return (
       <span
         className={`px-3 py-2 rounded-md text-sm font-medium ${
-          status
-            ? 'bg-green-100 text-green-800'
-            : 'bg-red-100 text-red-800'
+          status ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
         }`}
       >
         {status ? '✓ Valid' : '✗ Invalid'}
