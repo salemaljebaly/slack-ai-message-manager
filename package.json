@@ -14,7 +14,7 @@
     "setup:cors": "node scripts/setup-cors-proxy.js"
   },
   "dependencies": {
-    "next": "15.3.3",
+    "next": "15.4.10",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "lucide-react": "^0.456.0",
